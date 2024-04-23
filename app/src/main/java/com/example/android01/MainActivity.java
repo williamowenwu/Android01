@@ -14,6 +14,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.android01.common.Album;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
@@ -47,7 +48,8 @@ public class MainActivity extends AppCompatActivity {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 String albumName = album_textfield.getText().toString().trim();
                 if (!albumName.isEmpty()) {
-                    albumsAdapter.addAlbum(albumName);
+                    Album newAlbum = new Album(albumName);
+                    albumsAdapter.addAlbum(newAlbum, this);
                     album_textfield.setText(""); // Clear the input field
 
                     // Hide the keyboard
