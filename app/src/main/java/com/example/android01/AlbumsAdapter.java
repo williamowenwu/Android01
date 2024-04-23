@@ -1,12 +1,14 @@
 package com.example.android01;
 import android.content.Context;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -54,20 +56,48 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsAdapter.ViewHolder
         notifyItemInserted(albums.size() - 1);
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnTouchListener, GestureDetector.OnDoubleTapListener {
         TextInputEditText albumNameTextView;
         ImageView trashIcon;
+        GestureDetector gestureDetector;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             albumNameTextView = itemView.findViewById(R.id.textAlbumItemName);
-            // Initialize the ImageView and set it to gone by default
             trashIcon = itemView.findViewById(R.id.trash_icon);
             trashIcon.setVisibility(View.GONE);
 
+            // Initialize GestureDetector with SimpleOnGestureListener
+            gestureDetector = new GestureDetector(itemView.getContext(), new GestureDetector.SimpleOnGestureListener() {
+                @Override
+                public boolean onDoubleTap(MotionEvent e) {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        Album album = albums.get(position);
+                        Intent intent = new Intent(itemView.getContext(), PhotosActivity.class);
+                        intent.putExtra("albumName", album.getName());
+                        itemView.getContext().startActivity(intent);
+                    }
+                    return true;
+                }
+
+                @Override
+                public boolean onSingleTapConfirmed(MotionEvent e) {
+                    // Toggle the visibility of the trash icon when an item is clicked
+                    if (trashIcon.getVisibility() == View.GONE) {
+                        trashIcon.setVisibility(View.VISIBLE);
+                    } else {
+                        trashIcon.setVisibility(View.GONE);
+                    }
+                    return true;
+                }
+            });
+
+            itemView.setOnTouchListener(this);
+
             itemView.setOnClickListener(v -> {
                 // Toggle the visibility of the trash icon when an item is clicked
-                if(trashIcon.getVisibility() == View.GONE) {
+                if (trashIcon.getVisibility() == View.GONE) {
                     trashIcon.setVisibility(View.VISIBLE);
                 } else {
                     trashIcon.setVisibility(View.GONE);
@@ -100,6 +130,7 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsAdapter.ViewHolder
                 return false;
             });
         }
+
         private boolean containsAlbumName(String newName) {
             for (Album album : albums) {
                 if (album.getName().equalsIgnoreCase(newName)) {
@@ -108,6 +139,57 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsAdapter.ViewHolder
             }
             return false;
         }
+
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            int position = getAdapterPosition();
+            if (position != RecyclerView.NO_POSITION) {
+                Album album = albums.get(position);
+                Intent intent = new Intent(itemView.getContext(), PhotosActivity.class);
+                intent.putExtra("albumName", album.getName());
+                itemView.getContext().startActivity(intent);
+            }
+            return true;
+        }
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            gestureDetector.onTouchEvent(event);
+            return true;
+        }
+
+        @Override
+        public boolean onDoubleTapEvent(MotionEvent e) {
+            return false;
+        }
+
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            // Toggle the visibility of the trash icon on single tap
+            return true;
+        }
+
+//        Just to satisfy the interface below
+        public boolean onSingleTapUp(MotionEvent e) {
+            return false;
+        }
+
+        public void onShowPress(MotionEvent e) {}
+
+        public boolean onDown(MotionEvent e) {
+            return false;
+        }
+
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            return false;
+        }
+
+        public void onLongPress(MotionEvent e) {}
+
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            return false;
+        }
     }
+
 }
 
