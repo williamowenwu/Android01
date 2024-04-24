@@ -11,6 +11,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.Serializable;
+
 public class PhotosActivity extends AppCompatActivity {
 
     private static final int REQUEST_IMAGE_PICK = 1;
@@ -51,6 +53,21 @@ public class PhotosActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public static class PhotoItem implements Serializable {
+        private String imagePath;
+
+        public PhotoItem(String imagePath) {
+            this.imagePath = imagePath;
+        }
+
+        public String getImagePath() {
+            return imagePath;
+        }
+
+        public void setImagePath(String imagePath) {
+            this.imagePath = imagePath;
+        }
+    }
 }
 
 

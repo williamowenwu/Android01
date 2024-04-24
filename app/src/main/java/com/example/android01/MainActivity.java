@@ -15,9 +15,25 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.android01.common.Album;
+import com.example.android01.common.PhotoAdapter;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.provider.MediaStore;
+import android.view.View;
+import android.widget.Button;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import java.util.ArrayList;
+import java.util.List;
+
+import other.PhotoItem;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,6 +41,14 @@ public class MainActivity extends AppCompatActivity {
     private TextInputEditText album_textfield;
     private TextInputEditText currentlyClicked;
     private AlbumsAdapter albumsAdapter;
+
+    //attempt to get photos from gallery
+    private static final int REQUEST_IMAGE_GET = 1;
+    private Button btnAddPhotos;
+    private RecyclerView recyclerViewPhotos;
+    private List<PhotoItem> selectedPhotosList;
+    private PhotoAdapter photoAdapter;
+
 
     public static Intent newIntent(Context context) {
         Intent intent = new Intent(context, MainActivity.class);
@@ -37,8 +61,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        btnAddPhotos = findViewById(R.id.btnAddPhotos);
         album_recycler_view = findViewById(R.id.album_recycler_view);
         album_textfield = findViewById(R.id.album_textfield);
+        recyclerViewPhotos = findViewById(R.id.recyclerViewPhotos); // Add this line
 
         album_recycler_view.setLayoutManager(new LinearLayoutManager(this));
         albumsAdapter = new AlbumsAdapter(new ArrayList<>());
@@ -60,5 +86,46 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         });
+        //more open photos stuff
+        selectedPhotosList = new ArrayList<>();
+        photoAdapter = new PhotoAdapter(selectedPhotosList);
+        recyclerViewPhotos.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewPhotos.setAdapter(photoAdapter);
+
+        btnAddPhotos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Handle add photos button click
+                openGallery();
+            }
+        });
+    }
+        private void openGallery() {
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("image/*");
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            if (intent.resolveActivity(getPackageManager()) != null) {
+                startActivityForResult(intent, REQUEST_IMAGE_GET);
+            }
+        }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_IMAGE_GET && resultCode == RESULT_OK && data != null) {
+            if (data.getClipData() != null) {
+                int count = data.getClipData().getItemCount();
+                for (int i = 0; i < count; i++) {
+                    Uri imageUri = data.getClipData().getItemAt(i).getUri();
+                    selectedPhotosList.add(new PhotoItem(imageUri.toString()));
+                }
+            } else if (data.getData() != null) {
+                Uri imageUri = data.getData();
+                selectedPhotosList.add(new PhotoItem(imageUri.toString()));
+            }
+            photoAdapter.notifyDataSetChanged();
+        }
     }
 }
+
