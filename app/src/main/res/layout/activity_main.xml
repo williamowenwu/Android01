@@ -44,29 +44,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/album_textfield" />
 
-    <!-- Sample Button -->
-    <Button
-        android:id="@+id/btnAddPhotos"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Add Photos"
-        android:layout_centerInParent="true"
-        app:layout_constraintTop_toTopOf="@id/album_textfield"
-        app:layout_constraintBottom_toBottomOf="@id/album_textfield"
-        app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- RecyclerView for photos -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewPhotos"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:backgroundTint="#03A9F4"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnAddPhotos" />
 </androidx.constraintlayout.widget.ConstraintLayout>
