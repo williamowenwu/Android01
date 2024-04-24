@@ -108,6 +108,9 @@ public class PhotosActivity extends AppCompatActivity {
             }
             Log.d("PhotosActivity", "Number of selected photos: " + selectedPhotosList.size()); // Log photo count
             photoAdapter.notifyDataSetChanged();
+            for (PhotoItem photoItem : selectedPhotosList) {
+                Log.d("ImagePath", "Path: " + photoItem.getImagePath());
+            }
         }
     }
 
