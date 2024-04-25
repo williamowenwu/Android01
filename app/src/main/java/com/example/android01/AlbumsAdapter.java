@@ -1,30 +1,28 @@
 package com.example.android01;
+
 import android.content.Context;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
 import android.content.Intent;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.Toast;
-
+import com.example.android01.common.Album;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.android01.common.Album;
 import com.google.android.material.textfield.TextInputEditText;
-
-import java.util.List;
 
 public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsAdapter.ViewHolder> {
 
-    private List<Album> albums;
+    private User user = User.getInstance();  // Use the User singleton directly.
 
-    public AlbumsAdapter(List<Album> albums) {
-        this.albums = albums;
+    public AlbumsAdapter() {
+        super();
     }
 
     @NonNull
@@ -36,24 +34,22 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Album album = albums.get(position);
+        Album album = user.getAlbums().get(position);
         holder.albumNameTextView.setText(album.getName());
     }
 
     @Override
     public int getItemCount() {
-        return albums.size();
+        return user.getAlbums().size();
     }
 
     public void addAlbum(Album album, Context context) {
-        for (Album existingAlbum : albums) {
-            if (existingAlbum.getName().equalsIgnoreCase(album.getName())) {
-                Toast.makeText(context, "Album name already exists.", Toast.LENGTH_SHORT).show();
-                return;
-            }
+        if (user.addAlbum(album)) {  // Add album through User's method to ensure uniqueness.
+            notifyItemInserted(user.getAlbums().size() - 1);
+            User.saveToFile(context);
+        } else {
+            Toast.makeText(context, "Album name already exists :(", Toast.LENGTH_SHORT).show();
         }
-        albums.add(album);
-        notifyItemInserted(albums.size() - 1);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnTouchListener, GestureDetector.OnDoubleTapListener {
@@ -67,13 +63,13 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsAdapter.ViewHolder
             trashIcon = itemView.findViewById(R.id.trash_icon);
             trashIcon.setVisibility(View.GONE);
 
-            // Initialize GestureDetector with SimpleOnGestureListener
             gestureDetector = new GestureDetector(itemView.getContext(), new GestureDetector.SimpleOnGestureListener() {
                 @Override
                 public boolean onDoubleTap(MotionEvent e) {
+                    // Action on double tap, e.g., open album details.
                     int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {
-                        Album album = albums.get(position);
+                        Album album = user.getAlbums().get(position);
                         Intent intent = new Intent(itemView.getContext(), PhotosActivity.class);
                         intent.putExtra("albumName", album.getName());
                         itemView.getContext().startActivity(intent);
@@ -83,45 +79,36 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsAdapter.ViewHolder
 
                 @Override
                 public boolean onSingleTapConfirmed(MotionEvent e) {
-                    // Toggle the visibility of the trash icon when an item is clicked
-                    if (trashIcon.getVisibility() == View.GONE) {
-                        trashIcon.setVisibility(View.VISIBLE);
-                    } else {
-                        trashIcon.setVisibility(View.GONE);
-                    }
+                    // Toggle the visibility of the trash icon.
+                    trashIcon.setVisibility(trashIcon.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
                     return true;
                 }
             });
 
             itemView.setOnTouchListener(this);
 
-            itemView.setOnClickListener(v -> {
-                // Toggle the visibility of the trash icon when an item is clicked
-                if (trashIcon.getVisibility() == View.GONE) {
-                    trashIcon.setVisibility(View.VISIBLE);
-                } else {
-                    trashIcon.setVisibility(View.GONE);
-                }
-            });
-
             trashIcon.setOnClickListener(v -> {
-                // Delete the album and notify the adapter
                 int position = getAdapterPosition();
                 if (position != RecyclerView.NO_POSITION) {
-                    albums.remove(position);
+                    user.getAlbums().remove(position);
                     notifyItemRemoved(position);
+                    notifyItemRangeChanged(position, user.getAlbums().size());
+                    User.saveToFile(itemView.getContext());  // Save updated User data.
                 }
             });
 
             albumNameTextView.setOnEditorActionListener((v, actionId, event) -> {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    // Finalize editing of album name
                     String newName = albumNameTextView.getText().toString().trim();
-                    if (!newName.isEmpty() && !containsAlbumName(newName)) {
-                        Album album = albums.get(getAdapterPosition());
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION && !newName.isEmpty() && !containsAlbumName(newName, position)) {
+                        Album album = user.getAlbums().get(position);
                         album.setName(newName);
-                        notifyItemChanged(getAdapterPosition());
+                        notifyItemChanged(position);
+                        User.saveToFile(itemView.getContext());  // Save changes
                     } else {
-                        Toast.makeText(itemView.getContext(), "Album name already exists or is empty.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(itemView.getContext(), "Invalid name or name already exists.", Toast.LENGTH_SHORT).show();
                     }
                     InputMethodManager imm = (InputMethodManager) itemView.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
@@ -131,25 +118,13 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsAdapter.ViewHolder
             });
         }
 
-        private boolean containsAlbumName(String newName) {
-            for (Album album : albums) {
-                if (album.getName().equalsIgnoreCase(newName)) {
+        private boolean containsAlbumName(String newName, int currentIndex) {
+            for (int i = 0; i < user.getAlbums().size(); i++) {
+                if (i != currentIndex && user.getAlbums().get(i).getName().equalsIgnoreCase(newName)) {
                     return true;
                 }
             }
             return false;
-        }
-
-        @Override
-        public boolean onDoubleTap(MotionEvent e) {
-            int position = getAdapterPosition();
-            if (position != RecyclerView.NO_POSITION) {
-                Album album = albums.get(position);
-                Intent intent = new Intent(itemView.getContext(), PhotosActivity.class);
-                intent.putExtra("albumName", album.getName());
-                itemView.getContext().startActivity(intent);
-            }
-            return true;
         }
 
         @Override
@@ -165,11 +140,15 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsAdapter.ViewHolder
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
-            // Toggle the visibility of the trash icon on single tap
             return true;
         }
 
-//        Just to satisfy the interface below
+        @Override
+        public boolean onDoubleTap(@NonNull MotionEvent e) {
+            return false;
+        }
+
+        // Additional gesture methods as placeholders
         public boolean onSingleTapUp(MotionEvent e) {
             return false;
         }
@@ -190,6 +169,5 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsAdapter.ViewHolder
             return false;
         }
     }
-
 }
 

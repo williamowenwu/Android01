@@ -1,12 +1,13 @@
 package com.example.android01.common;
 
 // Album.java
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Album {
+public class Album implements Serializable {
     private String name;
-    private List<String> photos;
+    private ArrayList<Photo> photos;
 
     public Album(String name) {
         this.name = name;
@@ -22,11 +23,11 @@ public class Album {
         this.name = name;
     }
 
-    public List<String> getPhotos() {
+    public ArrayList<Photo> getPhotos() {
         return photos;
     }
 
-    public void addPhoto(String photo) {
+    public void addPhoto(Photo photo) {
         photos.add(photo);
     }
 }
