@@ -20,14 +20,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.android01.common.Album;
 import com.example.android01.common.Photo;
 import com.example.android01.common.PhotoAdapter;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class PhotosActivity extends AppCompatActivity {
     private RecyclerView recyclerViewPhotos;
     private PhotoAdapter photoAdapter;
     private ArrayList<Photo> selectedPhotosList;
+
+    private String albumName;
 
     User user = User.getInstance();
     private ActivityResultLauncher<Intent> selectImageLauncher;
@@ -50,12 +52,12 @@ public class PhotosActivity extends AppCompatActivity {
         this.selectedPhotosList = album.getPhotos();
         System.out.println("LSGJSLKD " + album.getPhotos().size());
 
+        this.albumName = album.getName();
         ImageButton previousButton = findViewById(R.id.returnButton);
         previousButton.setOnClickListener(v -> {
             User.getInstance().saveToFile(this);
             finish();
         });
-
 
         Button btnAddPhotos = findViewById(R.id.btnAddPhotos);
         btnAddPhotos.setOnClickListener(v -> {
@@ -67,7 +69,7 @@ public class PhotosActivity extends AppCompatActivity {
 
     private void setupRecyclerView() {
         recyclerViewPhotos = findViewById(R.id.recyclerViewPhotos);
-        photoAdapter = new PhotoAdapter(selectedPhotosList);
+        photoAdapter = new PhotoAdapter(selectedPhotosList, findViewById(R.id.fabDelete), findViewById(R.id.fabMove), albumName);
         recyclerViewPhotos.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewPhotos.setAdapter(photoAdapter);
     }

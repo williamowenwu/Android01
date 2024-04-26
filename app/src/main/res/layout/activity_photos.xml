@@ -39,14 +39,27 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp" />
 
-    <!--  <com.google.android.material.floatingactionbutton.FloatingActionButton
-          android:id="@+id/addPhotoButton"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:src="@android:drawable/ic_input_add"
-          app:layout_constraintEnd_toEndOf="parent"
-          app:layout_constraintBottom_toBottomOf="parent"
-          android:layout_margin="16dp"/> -->
+    <!-- Move FloatingActionButton -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabMove"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_menu_edit"
+        app:layout_constraintEnd_toEndOf="@id/btnAddPhotos"
+        app:layout_constraintBottom_toTopOf="@id/btnAddPhotos"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone"/>
+
+    <!-- Delete FloatingActionButton -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabDelete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_menu_delete"
+        app:layout_constraintEnd_toEndOf="@id/fabMove"
+        app:layout_constraintBottom_toTopOf="@id/fabMove"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone"/>
 
 
     <Button
