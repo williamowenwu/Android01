@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.android01.common.Album;
+import com.example.android01.common.SearchFunc;
 import com.google.android.material.textfield.TextInputEditText;
 
 public class MainActivity extends AppCompatActivity {
@@ -30,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         User.loadFromFile(this);
+
+        SearchFunc.setupSearchButton(this);
 
         albumRecyclerView = findViewById(R.id.album_recycler_view);
         albumTextField = findViewById(R.id.album_textfield);

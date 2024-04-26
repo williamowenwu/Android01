@@ -76,6 +76,9 @@ public class User implements Serializable {
         this.tags = tags;
     }
 
+    // Validation already done in the Slideshow :D
+    public void addTag(Tag tag){this.tags.add(tag);}
+
     // Save the User instance to a file
     public static void saveToFile(Context context) {
         File directory = new File(context.getFilesDir(), "data");

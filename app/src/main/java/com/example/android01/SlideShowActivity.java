@@ -141,8 +141,10 @@ public class SlideShowActivity extends AppCompatActivity {
                     Toast.makeText(this, "Error: Tag already exists on this photo", Toast.LENGTH_SHORT).show();
 
                 } else {
+                    // on successful add of a new tag
                     Log.d("SlideTagAdapter", "Adding tag: " + newTag.toString());
                     tagAdapter.notifyItemInserted(currPhoto.getTags().size() - 1);
+
                     User.saveToFile(this);
                     Log.d("SlideTagAdapter", "Tag added. Total tags now: " + currPhoto.getTags().size());
                 }
