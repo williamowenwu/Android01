@@ -1,6 +1,7 @@
     package com.example.android01.common;
 
     import android.content.Context;
+    import android.content.Intent;
     import android.graphics.Bitmap;
     import android.graphics.BitmapFactory;
     import android.net.Uri;
@@ -18,6 +19,7 @@
     import androidx.recyclerview.widget.RecyclerView;
 
     import com.example.android01.R;
+    import com.example.android01.SlideShowActivity;
     import com.example.android01.User;
     import com.example.android01.common.Photo;
     import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -36,7 +38,6 @@
         private FloatingActionButton moveIcon;
         private static final long DOUBLE_CLICK_TIME_THRESHOLD = 300; // in milliseconds
         private long lastClickTime = 0;
-
         private String albumName;
 
         public PhotoAdapter(ArrayList<Photo> photosList, FloatingActionButton deleteIcon, FloatingActionButton moveIcon, String albumName) {
@@ -64,7 +65,7 @@
             }
         }
 
-        private void setImageFromUri(ImageView imageView, Uri imageUri) {
+        public static void setImageFromUri(ImageView imageView, Uri imageUri) {
             InputStream inputStream = null;
             try {
                 inputStream = imageView.getContext().getContentResolver().openInputStream(imageUri);
@@ -88,12 +89,16 @@
             holder.imageView.setOnClickListener(v -> {
                 long clickTime = System.currentTimeMillis();
                 if (clickTime - lastClickTime < DOUBLE_CLICK_TIME_THRESHOLD) {
-                    // Double click logic
-//                    context.startActivity(PhotoActivity.newIntent(context, position, currAlbumPosition, currAlbum));
+                    // Double click logic -> goes to slideshow view
+                    Intent intent = new Intent(v.getContext(), SlideShowActivity.class);
+                    intent.putExtra("albumName", this.albumName);
+                    intent.putExtra("position", position);
+                    v.getContext().startActivity(intent);
+                    User.saveToFile(v.getContext());
                     Log.d("double", "doubly wubbly");
                 }
                 else {
-                    // Single click logic
+                    // Single click logic -> makes it visable and appear on screen
                     Log.d("single", "single ladiessss");
                     deleteIcon.setVisibility(View.VISIBLE);
                     moveIcon.setVisibility(View.VISIBLE);
@@ -125,7 +130,7 @@
             for (int i = 0; i < User.getInstance().getAlbums().size(); i++) {
                 Album currentAlbum = User.getInstance().getAlbums().get(i);
                 if(!currentAlbum.getName().equals(albumName)){
-                    popupMenu.getMenu().add(0, i, i, currentAlbum.getName());
+                    popupMenu.getMenu().add(0, i, i, currentAlbum.getName()); // sets the Id for the popup too
                 }
             }
 
