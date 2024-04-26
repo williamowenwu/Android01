@@ -66,7 +66,9 @@ public class SlideTagAdapter extends RecyclerView.Adapter<SlideTagAdapter.TagVie
             trashIcon.setOnClickListener(v -> {
                 int position = getAdapterPosition();
                 if (position != RecyclerView.NO_POSITION) {
-                    tags.remove(position);  // Remove the tag from the data set
+                    Tag tagToRemove = tags.get(position);
+                    tags.remove(tagToRemove);  // Remove the tag from the data set
+                    User.getInstance().getTags().remove(tagToRemove);
                     notifyItemRemoved(position);
                     Log.d("works?", "New amount: " + tags.size());
                     notifyItemRangeChanged(position, tags.size());  // Update the positions of remaining items
