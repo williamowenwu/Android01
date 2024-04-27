@@ -66,10 +66,13 @@ public class SlideTagAdapter extends RecyclerView.Adapter<SlideTagAdapter.TagVie
             trashIcon.setOnClickListener(v -> {
                 int position = getAdapterPosition();
                 if (position != RecyclerView.NO_POSITION) {
+                    Log.d("works?", "old amount: " + tags.size());
+                    Log.d("user tags?", "old amount: " + User.getInstance().getTags().size());
                     Tag tagToRemove = tags.get(position);
                     tags.remove(tagToRemove);  // Remove the tag from the data set
                     User.getInstance().getTags().remove(tagToRemove);
                     notifyItemRemoved(position);
+                    Log.d("user tags?", "New amount: " + User.getInstance().getTags().size());
                     Log.d("works?", "New amount: " + tags.size());
                     notifyItemRangeChanged(position, tags.size());  // Update the positions of remaining items
                     User.saveToFile(itemView.getContext());  // Save updated User data. This assumes you have a User class managing saving.

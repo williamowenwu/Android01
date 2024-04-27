@@ -22,6 +22,7 @@ import com.example.android01.User;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public class SearchFunc {
 
@@ -94,7 +95,6 @@ public class SearchFunc {
             }
         });
 
-        //Setup of OnEditListeners for auto complete
         firstTag.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 // Every time an input is placed in check if it matches a toString of existing tag if does return that tag
@@ -139,13 +139,13 @@ public class SearchFunc {
             boolean illegalTag1 = (tag1param == null);
             boolean illegalTag2 = !operator.equals("None") && (tag2param == null);
             if(!illegalTag1 && !illegalTag2){
-                // Search for both
-                Intent searchIntent = new Intent(context, PhotosActivity.class);
-                searchIntent.putExtra("TAG1", tag1param);
-                searchIntent.putExtra("OPERATOR", operator);
-                searchIntent.putExtra("TAG2",tag2param);
-                User.saveToFile(context);
 
+                Album resAlbum = search(tag1param,operator,tag2param);
+
+                Intent searchIntent = new Intent(context, PhotosActivity.class);
+                searchIntent.putExtra("albumName", "");
+                searchIntent.putExtra("resultPhotos", resAlbum);
+                User.saveToFile(context);
                 context.startActivity(searchIntent);
             }else{
                 if(illegalTag1){
@@ -157,5 +157,26 @@ public class SearchFunc {
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    public static Album search(Tag tag1, String operator, Tag tag2) {
+        Album result = new Album("");
+        Predicate<Photo> photoPredicate;
+
+        if(operator.equals("AND")){
+            photoPredicate = (Photo photo) -> (photo.containsTag(tag1) && photo.containsTag(tag2));
+        } else if(operator.equals("OR")){
+            photoPredicate = (Photo photo) -> (photo.containsTag(tag1) || photo.containsTag(tag2));
+        } else {
+            photoPredicate = (Photo photo) -> (photo.containsTag(tag1));
+        }
+
+        //actual appendage of photos to new list
+        User.getInstance().getAlbums().stream()
+                .flatMap(album -> album.getPhotos().stream())
+                .filter(currPhoto -> !(result.getPhotos().contains(currPhoto)) && photoPredicate.test(currPhoto))
+                .forEach(result::addPhoto);
+
+        return result;
     }
 }

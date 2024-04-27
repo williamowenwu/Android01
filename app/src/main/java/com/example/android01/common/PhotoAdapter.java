@@ -91,6 +91,9 @@
                 if (clickTime - lastClickTime < DOUBLE_CLICK_TIME_THRESHOLD) {
                     // Double click logic -> goes to slideshow view
                     Intent intent = new Intent(v.getContext(), SlideShowActivity.class);
+                    if(this.albumName.equalsIgnoreCase("")){
+                        intent.putExtra("resPhotos", this.photosList);
+                    }
                     intent.putExtra("albumName", this.albumName);
                     intent.putExtra("position", position);
                     v.getContext().startActivity(intent);

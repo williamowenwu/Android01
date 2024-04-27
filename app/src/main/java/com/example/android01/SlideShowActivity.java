@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.android01.common.Album;
 import com.example.android01.common.Photo;
 import com.example.android01.common.PhotoAdapter;
+import com.example.android01.common.SearchFunc;
 import com.example.android01.common.SlideTagAdapter;
 import com.example.android01.common.Tag;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -62,15 +63,22 @@ public class SlideShowActivity extends AppCompatActivity {
         this.photoPosition = getIntent().getIntExtra("position", 0);
         String albumName = getIntent().getStringExtra("albumName");
 
-        this.currAlbum = User.getInstance().getAlbum(albumName);
-        this.currPhoto = currAlbum.getPhotos().get(photoPosition);
-        this.photoList = currAlbum.getPhotos();
+        if(albumName.equalsIgnoreCase("")){
+            this.currAlbum = new Album("Result album");
+            this.photoList = (ArrayList<Photo>) getIntent().getSerializableExtra("resPhotos");
+            this.currPhoto = photoList.get(photoPosition);
+        } else {
+            this.currAlbum = User.getInstance().getAlbum(albumName);
+            this.currPhoto = currAlbum.getPhotos().get(photoPosition);
+            this.photoList = currAlbum.getPhotos();
+        }
 
         if (currPhoto == null) {
             Toast.makeText(this, "Error: Photo not found", Toast.LENGTH_SHORT).show();
             finish();
         }
 
+        SearchFunc.setupSearchButton(this);
         // Previous button
         ImageButton returnButton = findViewById(R.id.returnButton);
         returnButton.setOnClickListener(v -> {

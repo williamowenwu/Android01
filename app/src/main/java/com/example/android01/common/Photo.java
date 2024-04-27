@@ -26,6 +26,15 @@ public class Photo implements Serializable {
         return true;
     }
 
+    public boolean containsTag(Tag tag){
+        for(Tag myTag: tags){
+            if(myTag.equals(tag)){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public ArrayList<Tag> getTags(){
         return this.tags;
     }
